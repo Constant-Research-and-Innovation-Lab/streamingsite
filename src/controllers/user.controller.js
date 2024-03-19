@@ -19,7 +19,7 @@ const registerUser = asyncHandler(async(req,res)=>{
     console.log("email",email);
 
     if(
-        [fullName,email,username,password].some((field)=>field?.trim()==="")
+        [fullName,email,username,password ].some((field)=>field?.trim()==="")
     ){
         throw new ApiError(400,"All fields are required")
     }
@@ -31,8 +31,12 @@ const registerUser = asyncHandler(async(req,res)=>{
     if(existedUser){
         throw new ApiError(409,"User with email or username already exists")
     }
-    const avatarLocalPath = req.files?.avatar[0]?.path;
-    const coverImageLocalPath = req.files?.coverImage[0]?.path;
+
+    console.log(req.files)
+
+    const avatarLocalPath = req.files?.avatar?.[0]?.path;
+    const coverImageLocalPath = req.files?.coverImage?.[0]?.path;
+    
 
 
     if(!avatarLocalPath){
@@ -64,10 +68,11 @@ const registerUser = asyncHandler(async(req,res)=>{
         throw new ApiError(500, "Something went wrong while registering the user")
     }
     return res.status(201).json({
-        status: 200,
+        status: 201, 
         data: createdUser,
         message: "User registered successfully"
     });
+    
     
 
 })
