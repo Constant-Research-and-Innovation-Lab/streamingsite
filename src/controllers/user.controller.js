@@ -78,4 +78,18 @@ const registerUser = asyncHandler(async(req,res)=>{
 })
 
 
-export {registerUser};
+const loginUser = asyncHandler(async (req,res)=>{
+    // get user email and username and password
+    // then match the email , username and password with database
+    // ask for the access token.
+    // then give a refresh token for 15 minute for holding a session
+    // then if anything goes wrong send error
+})
+
+
+export {
+    
+    registerUser,
+    loginUser
+
+};
