@@ -67,11 +67,9 @@ const registerUser = asyncHandler(async(req,res)=>{
     if(!createdUser){
         throw new ApiError(500, "Something went wrong while registering the user")
     }
-    return res.status(201).json({
-        status: 201, 
-        data: createdUser,
-        message: "User registered successfully"
-    });
+    return res.status(201).json(
+      new ApiResponse(200,createdUser,"User registered successfully")
+    );
     
     
 
@@ -79,11 +77,24 @@ const registerUser = asyncHandler(async(req,res)=>{
 
 
 const loginUser = asyncHandler(async (req,res)=>{
+    // req body -> data
     // get user email and username and password
-    // then match the email , username and password with database
-    // ask for the access token.
-    // then give a refresh token for 15 minute for holding a session
-    // then if anything goes wrong send error
+    // find the user
+    // then password with database
+    // generate access and refresh token
+    // send cookies
+
+    const {email,username,password} = req.body
+
+    if(!username || !email){
+        throw new ApiError(400, "Username or password is required")
+    }
+
+    const
+
+
+
+
 })
 
 
