@@ -291,7 +291,25 @@ const updateUserAvatar = asyncHandler(async(req,res)=>{
         throw new ApiError(400, "Error while uploading avatar")
     }
 
-    const user = await User.findByIdAndUpdate(
+
+    let publicId = null;
+
+    const user = await User.findById(req.user?._id);
+    if(user && user.avatar){
+        const parts = user.avatar.split('/');
+        const filename = parts[parts.length - 1];
+        publicId = filename.split('.')[0];
+
+    }
+
+    
+    if (publicId) {
+        await cloudinary.uploader.destroy(publicId);
+    }
+
+
+
+    const updateUser = await User.findByIdAndUpdate(
         req.user?._id,
         {
             $set:{
@@ -303,10 +321,17 @@ const updateUserAvatar = asyncHandler(async(req,res)=>{
     ).select("-password")
     return res
     .status(200)
-    .json(new ApiResponse(200,user,"Avater updated successfully"))
+    .json(new ApiResponse(200,updateUser,"Avater updated successfully"))
 
 
 })
+
+
+
+
+
+
+
 
 
 const updateUserCoverImage = asyncHandler(async(req,res)=>{
