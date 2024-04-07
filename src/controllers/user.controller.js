@@ -302,7 +302,7 @@ const updateUserAvatar = asyncHandler(async(req,res)=>{
 
     }
 
-    
+
     if (publicId) {
         await cloudinary.uploader.destroy(publicId);
     }
@@ -325,12 +325,6 @@ const updateUserAvatar = asyncHandler(async(req,res)=>{
 
 
 })
-
-
-
-
-
-
 
 
 
