@@ -28,9 +28,9 @@ router.route("/logout").post(verifyJWT, logoutUser)
 
 router.route("/refresh-token").post(verifyJWT, refreshAccessToken)
 
-router.route("/update-avater").post(verifyJWT,upload.single("avatar"),updateUserAvatar)
+router.route("/avater").post(verifyJWT,upload.single("avater"),updateUserAvatar)
 
-router.route("/updateCoverImage").post(verifyJWT,upload.single("coverImage"),updateUserCoverImage)
+router.route("/coverImage").post(verifyJWT,upload.single("coverImage"),updateUserCoverImage)
 
   
 export default router;
