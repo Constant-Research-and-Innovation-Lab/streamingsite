@@ -4,7 +4,7 @@ import { User } from "../models/user.model.js";
 import { deleteFromCloudinary, uploadOnCloudinary } from "../utils/cloudnary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
-import {v2 as cloudinary} from "cloudinary";
+
 
 const generateAccessAndRefreshTokens = async(userId) => {
     try{
@@ -332,7 +332,6 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
         {
             $set: {
                 coverImage: coverImage.url,
-                coverImagePublicId: coverImage.public_id // Use 'public_id' instead of 'coverImagePublicId'
             }
         },
         { new: true }
