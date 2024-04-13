@@ -277,8 +277,6 @@ const updateAccountDetails = asyncHandler(async(req,res)=>{
 
 const updateUserAvatar = asyncHandler(async(req, res) => {
     
-
-    
     const avatarLocalPath = req.file?.path ;
 
     if (!avatarLocalPath) {
@@ -286,6 +284,10 @@ const updateUserAvatar = asyncHandler(async(req, res) => {
     }
 
     //TODO: delete old image - assignment
+    const user = await User.findById(req.user?.id)
+    if(user && user.avatar){
+        await deleteFromCloudinary(user.avatar)
+    }
 
     const avatar = await uploadOnCloudinary(avatarLocalPath)
 
@@ -294,7 +296,7 @@ const updateUserAvatar = asyncHandler(async(req, res) => {
         
     }
 
-    const user = await User.findByIdAndUpdate(
+    const updatedUser = await User.findByIdAndUpdate(
         req.user?._id,
         {
             $set:{
@@ -307,14 +309,14 @@ const updateUserAvatar = asyncHandler(async(req, res) => {
     return res
     .status(200)
     .json(
-        new ApiResponse(200, user, "Avatar image updated successfully")
+        new ApiResponse(200, updatedUser, "Avatar image updated successfully")
     )
 })
 
 const updateUserCoverImage = asyncHandler(async (req, res) => {
-   
 
     const coverImageLocalPath = req.file?.path;
+  
 
     if (!coverImageLocalPath) {
         throw new ApiError(400, "Cover image file is missing");
@@ -325,6 +327,17 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
     if (!coverImage.url) {
         throw new ApiError(400, "Error while uploading cover image");
     }
+
+    console.log(coverImage.url)
+
+    
+    // First deleting the old cover image and then updating the new one
+
+    const user = await User.findById(req.user?.id)
+    if(user && user.coverImage){
+        await deleteFromCloudinary(user.coverImage)
+    }
+
 
     // Update the user with the new cover image
     const updatedUser = await User.findByIdAndUpdate(
