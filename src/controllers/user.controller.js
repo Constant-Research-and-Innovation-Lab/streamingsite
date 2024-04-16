@@ -315,7 +315,7 @@ const updateUserAvatar = asyncHandler(async(req, res) => {
 
 const updateUserCoverImage = asyncHandler(async (req, res) => {
 
-    const coverImageLocalPath = req.file?.path;
+    const coverImageLocalPath = req.file?.path.User;
   
 
     if (!coverImageLocalPath) {
@@ -356,6 +356,36 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
 });
 
 
+const getUserChannelProfile = asyncHandler(async(req,res)=>{
+    const {username} = req.params;
+    if(!username?.trim()){
+        throw new ApiError(400,"username is missing")
+    }
+
+    const channel = await User.aggregate([
+        {
+            $match: {
+                username: username?.toLowerCase()
+            }
+        },
+        {
+            $lookup: {
+                from: "Subscription"
+            }
+        }
+
+])
+
+
+})
+
+
+
+const subscriptionModel = asyncHandler(async(r)=>{
+    
+
+    
+})
 
 
 
