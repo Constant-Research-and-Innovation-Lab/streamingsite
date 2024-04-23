@@ -154,8 +154,8 @@ const logoutUser = asyncHandler(async(req,res)=>{
     await User.findByIdAndUpdate(
         req.user._id,
         {
-            $set:{
-                refreshToken: undefined
+            $unset:{
+                refreshToken: 1
             }
         },
         {
@@ -224,31 +224,38 @@ const refreshAccessToken = asyncHandler(async(req,res)=>{
 })
 
 
-const changeCurrentPassword = asyncHandler(async(req,res)=>{
-    const {oldPassword,newPassword,confPassword} = req.body
-    
+const changeCurrentPassword = asyncHandler(async(req, res) => {
+    const { oldPassword, newPassword, confPassword } = req.body;
 
-    const user = await User.findById(req.user?.id)
-    const isPasswordCorrect = await user.
-    isPasswordCorrect(oldPassword)
-    if(!isPasswordCorrect){
-        throw new ApiError(400,"Invalid old password")
+    const user = await User.findById(req.user?.id);
+
+    // Check if the old password is correct
+    const isPasswordValid = await user.isPasswordCorrect(oldPassword);
+
+    // isPasswordCorrect should return true if the old password is correct
+    if (!isPasswordValid) {
+        throw new ApiError(400, "Invalid old password");
     }
-    user.password = newPassword
-    await user.save({validateBeforeSave: false})
-    return res
-    .status(200)
-    .json(new ApiResponse(200,{},"user password saved successfully"))
+
+    if(newPassword !== confPassword){
+        throw new ApiError(400, "Password didn't match")
+    }
 
 
 
-})
+    // Update the user's password and save the changes
+    user.password = newPassword;
+    await user.save({ validateBeforeSave: false });
+
+    return res.status(200).json(new ApiResponse(200, {}, "User password saved successfully"));
+});
+
 
 
 const getCurrentUser = asyncHandler(async(req,res)=>{
     return res
     .status(200)
-    .json(200,req.user, "current user fetched successfully")
+    .json(new ApiResponse(200,req.user, "current user fetched successfully"))
 })
 
 const updateAccountDetails = asyncHandler(async(req,res)=>{
@@ -316,7 +323,7 @@ const updateUserAvatar = asyncHandler(async(req, res) => {
 
 const updateUserCoverImage = asyncHandler(async (req, res) => {
 
-    const coverImageLocalPath = req.file?.path.User;
+    const coverImageLocalPath = req.file?.path;
   
 
     if (!coverImageLocalPath) {
@@ -329,7 +336,7 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Error while uploading cover image");
     }
 
-    console.log(coverImage.url)
+  
 
     
     // First deleting the old cover image and then updating the new one
@@ -337,6 +344,8 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
     const user = await User.findById(req.user?.id)
     if(user && user.coverImage){
         await deleteFromCloudinary(user.coverImage)
+    }else{
+        
     }
 
 
@@ -395,7 +404,7 @@ const getUserChannelProfile = asyncHandler(async(req,res)=>{
                 },
                 isSubscribed:{
                     $cond: {
-                        if: {$in: [req.user?._id,"$subscribers,subscriber"]},
+                        if: {$in: [req.user?._id,"$subscribers.subscriber"]},
                         then: true,
                         else: false
                         
