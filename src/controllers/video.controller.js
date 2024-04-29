@@ -4,6 +4,7 @@ import { User } from "../models/user.model.js";
 import { deleteFromCloudinary, uploadOnCloudinary } from "../utils/cloudnary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Video } from "../models/video.model.js";
+import { Types } from "mongoose";
 
 const publishAVideo = asyncHandler(async (req, res) => {
     const { title, description, isPublished = true } = req.body;
@@ -44,18 +45,48 @@ const publishAVideo = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Failed to upload video");
     }
 
-    return res.status(200).json({
-        status: 200,
-        message: "Video uploaded successfully",
-        data: video
-    });
+    return res.status(200).json(new ApiResponse(200,video,"video uploaded successfully"));
 });
 
 
 
 const getVideoById = asyncHandler(async(req,res) => {
 
-    const {videoId} = req.params
+    const { videoId } = req.params
+
+  
+    if(!videoId){
+        throw new ApiError(400, "Please provide a video id")
+    }
+
+   
+
+    const video = await Video.aggregate([
+        {
+            $match:{
+                _id : new Types.ObjectId(videoId)
+            }
+        },
+        {
+            $lookup:{
+                from: "videos",
+                localField: "owner",
+                foreignField:"_id",
+                as: "owner",
+            }
+        }
+    
+    ])
+    
+    // console.log(video)
+
+    if(!video){
+        throw new ApiError(400, "Video not found")
+    }
+
+    return res.status(200).json(new ApiResponse(200,video,"Video Fetched Successfully"))
+    
+
 
 })
 
