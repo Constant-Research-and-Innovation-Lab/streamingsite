@@ -72,32 +72,106 @@ const getVideoById = asyncHandler(async(req,res) => {
                 from: "videos",
                 localField: "owner",
                 foreignField:"_id",
-                as: "owner",
+                as: "video",
             }
         }
     
     ])
     
-    // console.log(video)
 
-    if(!video){
+    // console.log(video[0].owner)
+
+    if(!video[0]){
         throw new ApiError(400, "Video not found")
     }
 
-    return res.status(200).json(new ApiResponse(200,video,"Video Fetched Successfully"))
+    return res.status(200).json(new ApiResponse(200,video[0],"Video Fetched Successfully"))
     
 
 
 })
 
 
-const updateVideo = asyncHandler((req,res)=>{
+const updateVideo = asyncHandler(async(req,res)=> {
+
     const {videoId} = req.params
+
+    const { title, description } = req.body
+
+    const video = await Video.findOne(req.video?._id);
+
+    console.log(video)
+
+    if(!videoId){ throw new ApiError(400, "Video Id not found")}
+
+    const thumbnailLocalPath = req.file?.path;
+
+    if(!thumbnailLocalPath){
+        throw new ApiError(400, "Upload the thumbnail")
+    };
+
+   
+    if(video && video.thumbnail){
+        await deleteFromCloudinary(video.thumbnail)
+    }
+
+
+    const thumbnail = await uploadOnCloudinary(thumbnailLocalPath);
+
+    if(!thumbnail.url){
+        throw new ApiError(400, "Error while uploading the file")
+    }
+
+
+    const updatedVideo = await Video.findOneAndUpdate(
+        req.video?._id,
+        {
+            $set : {
+                thumbnail: thumbnail.url,
+                title,
+                description
+            }
+        },
+        {
+            new:true
+        }
+    )
+
+
+
+
+    return res
+            .status(200)
+            .json(new ApiResponse(200,updatedVideo,"Video Updated updated successfully"))
+
 })
 
 
-const deleteVideo = asyncHandler((req,res)=>{
-    const { videoID } = req.params
+const deleteVideo = asyncHandler(async(req,res)=>{
+    const { videoId } = req.params
+
+    const video = await Video.findOne(req.video?._id)
+
+    if(video.videoFile){
+        await deleteFromCloudinary(video.videoFile)
+    }else{
+        throw new ApiError(400, "Could not delete the video")
+    }
+
+
+    if(video.thumbnail){
+        await deleteFromCloudinary(video.thumbnail)
+    } else {
+        throw new ApiError(400, "Could not delete thumnail")
+    }
+        
+      
+    
+    const deleteOnMongoDb = await Video.findOneAndDelete(videoId) 
+
+    return res 
+            .status(200)
+            .json(new ApiResponse(400, deleteOnMongoDb, "Video Deleted successfully"))
 
 })
 
