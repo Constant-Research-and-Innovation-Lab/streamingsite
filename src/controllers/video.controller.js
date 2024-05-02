@@ -98,7 +98,7 @@ const updateVideo = asyncHandler(async(req,res)=> {
 
     const { title, description } = req.body
 
-    const video = await Video.findOne(req.video?._id);
+    const video = await Video.findById(videoId);
 
     console.log(video)
 
@@ -124,7 +124,7 @@ const updateVideo = asyncHandler(async(req,res)=> {
 
 
     const updatedVideo = await Video.findOneAndUpdate(
-        req.video?._id,
+        { _id: videoId},
         {
             $set : {
                 thumbnail: thumbnail.url,
